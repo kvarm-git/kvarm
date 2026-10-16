@@ -184,14 +184,24 @@ describe('GET /repos/:owner/:repo/history', () => {
     repo.fake.calls.length = 0;
     expect(await stub.pushed({ ref: 'refs/heads/main', after: child.sha, eventAt: Date.now() + 1000 })).toBe('indexed');
     await runDurableObjectAlarm(stub);
-    expect(repo.fake.calls.filter((entry) => entry.startsWith('log:'))).toEqual([`log:${child.sha}`]);
-    const state = await runInDurableObject(stub, async (_obj: PathHistory, storage) =>
+    // An automatic alarm may already be running, so the helper need not wait for its indexing work.
+    await expect.poll(() => runInDurableObject(stub, async (_obj: PathHistory, storage) =>
       storage.storage.sql.exec<{ known_sha: string; head_sha: string }>('SELECT known_sha,head_sha FROM state').toArray()[0],
-    );
-    expect(state).toMatchObject({ known_sha: child.sha, head_sha: child.sha });
+    )).toMatchObject({ known_sha: child.sha, head_sha: child.sha });
+    expect(repo.fake.calls.filter((entry) => entry.startsWith('log:'))).toEqual([`log:${child.sha}`]);
     const before = repo.fake.calls.length;
     const result = await stub.query({ repoName: `${OWNER}--forward`, ref: 'refs/heads/main', path: 'f0.txt', limit: 30, cursor: null, cachedHead: child.sha });
-    expect(result.value?.index).toMatchObject({ indexedHead: child.sha, current: true });
+    expect(result).toMatchObject({
+      ok: true,
+      value: {
+        path: 'f0.txt', ref: 'refs/heads/main', headSha: child.sha, nextCursor: null,
+        index: { indexedHead: child.sha, current: true, rootReached: true, gaps: 0, complete: true, progressed: false },
+      },
+    });
+    expect(result.value?.commits.map(({ sha, status }) => ({ sha, status }))).toEqual([
+      { sha: child.sha, status: 'modified' },
+      { sha: initial[0], status: 'added' },
+    ]);
     expect(repo.fake.calls.slice(before)).toEqual([]);
   });
 
