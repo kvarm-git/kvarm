@@ -1,3 +1,9 @@
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation-duration: 150ms; }
+}
+
 html.k-app { min-height: 100%; background: var(--void); }
 body.k-app { min-height: 100vh; background: var(--void); color: var(--bone); font: 400 var(--t-sm)/1.5 var(--f-sans); }
 body.k-app *, body.k-app *::before, body.k-app *::after { box-sizing: border-box; }

@@ -6,6 +6,7 @@ import { cachedInboxCount, type InboxCount } from '../services/inboxCount';
 import { sandboxBadgeCounts } from '../services/sandboxes';
 
 const CRITICAL_CSS = raw(`
+@media(prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--void,#050608);color:var(--bone,#e8e9e8);font-family:var(--f-sans,'Archivo',system-ui,sans-serif)}
 `);
