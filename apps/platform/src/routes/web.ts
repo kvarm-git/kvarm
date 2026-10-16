@@ -420,9 +420,9 @@ web.get('/settings/tokens', async (c) => {
             <code>${t.prefix}…</code>
             <div class="muted">${parseScopes(t.scopes).join(', ')}</div>
           </div>
-          <div>
+          <div class="actions">
             <span class="muted">${t.last_used_at ? timeAgo(t.last_used_at) : 'never used'}</span>
-            <form method="post" action="/settings/tokens/${t.id}/delete" style="display:inline">
+            <form method="post" action="/settings/tokens/${t.id}/delete">
               ${csrf}
               <button class="btn" type="submit">Revoke</button>
             </form>
@@ -549,7 +549,7 @@ web.get('/settings/agents/:id', async (c) => {
       const t = agents.agentTokenJson(row, now);
       const revoke =
         t.status === 'active'
-          ? html`<form method="post" action="/settings/agents/${a.id}/tokens/${t.id}/revoke" style="display:inline">
+          ? html`<form method="post" action="/settings/agents/${a.id}/tokens/${t.id}/revoke">
               ${csrf}<button class="btn" type="submit">Revoke</button></form>`
           : '';
       return html`
@@ -559,7 +559,7 @@ web.get('/settings/agents/:id', async (c) => {
             <span class="badge">${t.status}</span>
             <div class="muted">${t.repo} · ${t.role}${t.refs.length ? ` · ${t.refs.join(', ')}` : ''} · expires ${t.expiresAt ?? ''}</div>
           </div>
-          <div><span class="muted">last used ${t.lastUsedAt ?? 'never'}</span> ${raw(revoke)}</div>
+          <div class="actions"><span class="muted">last used ${t.lastUsedAt ?? 'never'}</span> ${raw(revoke)}</div>
         </div>
       `;
     })
